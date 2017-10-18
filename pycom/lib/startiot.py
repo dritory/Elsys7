@@ -8,12 +8,14 @@ import machine
 class Startiot:
 
     def __init__(self):
-        self.dev_eui = binascii.unhexlify("000000000000034d")
-        self.app_eui = binascii.unhexlify("00000000000000ee")
-        self.app_key = binascii.unhexlify("77504d7273735173567262527171324b")
+
+    def connect(self, blocking, dev_eui,app_eui,app_key):
+
+        self.dev_eui = binascii.unhexlify(app_eui)
+        self.app_eui = binascii.unhexlify(app_eui)
+        self.app_key = binascii.unhexlify(app_key)
 
         self.lora = LoRa(mode=LoRa.LORAWAN)
-    def connect(self, blocking):
         self.lora.join(activation=LoRa.OTAA, auth=(self.dev_eui, self.app_eui, self.app_key), timeout=0)
 
         while not self.lora.has_joined():
