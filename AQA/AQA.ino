@@ -50,13 +50,13 @@ void setup()
 
   delay(2000);
 
+  sensors.begin();
   //Pin 9 is controlling the pwr to the radio
   pinMode(RadioPin, OUTPUT);
   digitalWrite(RadioPin,LOW);
   //Pin 8 is controlling the pwr to the sensors
   pinMode(SensorPin, OUTPUT);
   digitalWrite(SensorPin,LOW);
-  
   initialize_radio();
   //transmit a startup message
   //myLora.tx("Initiated Node");
@@ -135,7 +135,6 @@ void loop()
     LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  
     LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  
     operate();
-    timer = 0;
     
 }
 
@@ -147,26 +146,32 @@ void operate()
     return;
   }
   switchSensors(true);
-  LowPower.idle(SLEEP_250MS, ADC_ON, TIMER4_OFF, TIMER3_OFF, TIMER1_ON, 
-           TIMER0_ON, SPI_OFF, USART1_ON, TWI_OFF,USB_ON);
-  sensors.begin();
+  LowPower.idle(SLEEP_250MS, ADC_ON, TIMER4_ON, TIMER3_ON, TIMER1_ON, 
+           TIMER0_ON, SPI_ON, USART1_ON, TWI_OFF,USB_ON);
+  delay(500);
   Serial.println("Gathering data");
-  LowPower.idle(SLEEP_1S, ADC_ON, TIMER4_OFF, TIMER3_OFF, TIMER1_ON, 
-           TIMER0_ON, SPI_OFF, USART1_ON, TWI_OFF,USB_ON);
+  sensors.begin();
+  delay(500);
+  LowPower.idle(SLEEP_1S, ADC_ON, TIMER4_ON, TIMER3_ON, TIMER1_ON, 
+           TIMER0_ON, SPI_ON, USART1_ON, TWI_OFF,USB_ON);
   sensors.requestTemperatures();
-    
+  LowPower.idle(SLEEP_500MS, ADC_ON, TIMER4_ON, TIMER3_ON, TIMER1_ON, 
+           TIMER0_ON, SPI_ON, USART1_ON, TWI_OFF,USB_ON);
+  delay(500);
   String payload = "";
   String konduktivitet = String(analogRead(kondPin));
   String turbiditet    = String(analogRead(turbPin));
   String ph            = String(analogRead(phPin));
   String temperatur  = String(sensors.getTempCByIndex(0));
-  
+  LowPower.idle(SLEEP_500MS, ADC_ON, TIMER4_ON, TIMER3_ON, TIMER1_ON, 
+           TIMER0_ON, SPI_ON, USART1_ON, TWI_OFF,USB_ON);
   payload = konduktivitet + "," + turbiditet + "," + ph +","+ temperatur;
+  switchSensors(false);
   Serial.println("Transmitting data");
   myLora.tx(payload);
   LowPower.idle(SLEEP_250MS, ADC_ON, TIMER4_OFF, TIMER3_OFF, TIMER1_ON, 
-           TIMER0_ON, SPI_OFF, USART1_ON, TWI_OFF,USB_ON);
-  switchSensors(false);
+           TIMER0_ON, SPI_OFF, USART1_OFF, TWI_OFF,USB_ON);
+  
   switchRadio(false);
   
 }
